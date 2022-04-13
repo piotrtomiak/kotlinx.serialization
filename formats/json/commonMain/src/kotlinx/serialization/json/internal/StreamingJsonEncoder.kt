@@ -35,7 +35,7 @@ internal class StreamingJsonEncoder(
 ) : JsonEncoder, AbstractEncoder() {
 
     internal constructor(
-        output: JsonStringBuilder, json: Json, mode: WriteMode,
+        output: JsonWriter, json: Json, mode: WriteMode,
         modeReuseCache: Array<JsonEncoder?>
     ) : this(Composer(output, json), json, mode, modeReuseCache)
 
@@ -160,7 +160,7 @@ internal class StreamingJsonEncoder(
 
     override fun encodeInline(inlineDescriptor: SerialDescriptor): Encoder =
         if (inlineDescriptor.isUnsignedNumber) StreamingJsonEncoder(
-            ComposerForUnsignedNumbers(composer.sb), json, mode, null
+            ComposerForUnsignedNumbers(composer.writer), json, mode, null
         )
         else super.encodeInline(inlineDescriptor)
 
@@ -192,7 +192,7 @@ internal class StreamingJsonEncoder(
         // First encode value, then check, to have a prettier error message
         if (forceQuoting) encodeString(value.toString()) else composer.print(value)
         if (!configuration.allowSpecialFloatingPointValues && !value.isFinite()) {
-            throw InvalidFloatingPointEncoded(value, composer.sb.toString())
+            throw InvalidFloatingPointEncoded(value, composer.writer.toString())
         }
     }
 
@@ -200,7 +200,7 @@ internal class StreamingJsonEncoder(
         // First encode value, then check, to have a prettier error message
         if (forceQuoting) encodeString(value.toString()) else composer.print(value)
         if (!configuration.allowSpecialFloatingPointValues && !value.isFinite()) {
-            throw InvalidFloatingPointEncoded(value, composer.sb.toString())
+            throw InvalidFloatingPointEncoded(value, composer.writer.toString())
         }
     }
 
